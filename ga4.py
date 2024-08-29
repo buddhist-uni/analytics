@@ -96,7 +96,10 @@ def report_purchasers_per_itemid(
     return_property_quota=True,
     limit=250000, # 250k should be enough for anyone (who needs pagination?)
   )
-  return client.run_report(request)
+  ret = client.run_report(request)
+  if ret.row_count > 250000:
+    raise NotImplementedError("Please add pagination logic to report_purchasers_per_itemid")
+  return ret
 
 def report_to_dict_list(report: data_v1beta.RunReportResponse):
   rows = []
