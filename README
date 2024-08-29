@@ -4,3 +4,11 @@ OBU primarily uses Google Analytics 4.
 
 This repo pulls data from the GA4 API for use in the production site.
 
+## Files
+
+requirements.txt - pip packages needed to run this code
+ga4.py           - The basic library code for interacting with the GA4 API
+data/            - The raw data pulled from Google
+  metadata.yaml  - Misc data about the files in this folder
+  ua_data.py     - The old data from Universal Analytics
+
