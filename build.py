@@ -30,16 +30,26 @@ content_folder = arguments.dest / "content"
 
 with open("data/metadata.yaml", "r") as metafile:
   metadata = yaml.load(metafile, Loader=yaml.FullLoader)
-last_ua_date = datetime.strptime(metadata["ua_data"]["end_date"], DATE_FORMAT)
-first_ga4_date = last_ua_date + timedelta(days=1)
+last_archive_date = datetime.strptime(metadata["ga4_data"]["end_date"], DATE_FORMAT)
+first_api_date = last_archive_date + timedelta(days=1)
 
-print(f"Fetching data from GA4 since {first_ga4_date.strftime(DATE_FORMAT)}...")
+print(f"Fetching data from GA4 since {first_api_date.strftime(DATE_FORMAT)}...")
 report = ga4.report_purchasers_per_itemid(
-  first_ga4_date.strftime(DATE_FORMAT),
+  first_api_date.strftime(DATE_FORMAT),
   "today",
 )
 downloaders = ga4.report_to_dict_list(report)
+
+print("Merging with archival data...")
+with open("data/ga4_data.csv", "r") as file:
+  csvreader = csv.DictReader(file)
+  for row in csvreader:
+    downloaders.append({
+      'itemId': row['itemId'],
+      'totalPurchasers': int(row['totalPurchasers']),
+    })
 downloaders = ga4.aggregate_duplicate_itemids(downloaders)
+
 def is_link(itemId):
   return ":" in itemId or itemId.startswith("tags/")
 link_counts = {

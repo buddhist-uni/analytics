@@ -14,6 +14,7 @@ def get_default_property_id():
 
 try:
   from google.analytics import data_v1beta
+  from google.auth.credentials import Credentials
   from google.auth.exceptions import DefaultCredentialsError
   from google.analytics.data_v1beta.types import (
     DateRange,
@@ -120,29 +121,51 @@ def report_to_dict_list(report: data_v1beta.RunReportResponse):
     rows.append(row_data)
   return rows
 
-def aggregate_duplicate_itemids(rows: list[dict]):
+def aggregate_duplicate_itemids(
+    rows: list[dict],
+  ) -> list[dict]:
   """ Merges rows with the same itemId into a single row.
 
-  Assumes that itemId is the only dimension.
+  Does not modify the original rows.
+  
+  ASSUMES that itemId is the only dimension AND that all other
+  cols are numerical metrics which are aggregated via addition
+  and that each row has the same cols.
 
   Matches \av/(*)#10\ with av/(1) and adds their values.
-  Discards \av/*#(!10)\
+  Discards \av/*#(>10)\
+
+  Returns: a new list of dicts
   """
-  rows_to_delete = set()
+  ret = []
+  ids_seen = dict()
+  summable_metric_cols = list(rows[0].keys())
+  summable_metric_cols.remove('itemId')
   for i in range(len(rows)):
     row = rows[i]
     if row['itemId'].startswith('av/') and '#' in row['itemId']:
-      rows_to_delete.add(i)
       if row['itemId'].endswith("#10"):
-        try:
-          main_row = [r for r in rows if r['itemId'] == row['itemId'][:-3]][0]
-          for k in main_row.keys():
-            if type(row[k]) == int or type(row[k]) == float:
-              main_row[k] += row[k]
-        except IndexError:
-          rows_to_delete.remove(i)
-          row["itemId"] = row["itemId"][:-3]
-  return [rows[i] for i in range(len(rows)) if i not in rows_to_delete]
+        itemId = row["itemId"][:-3]
+        if itemId in ids_seen:
+          # copy-on-write
+          ret[ids_seen[itemId]] = ret[ids_seen[itemId]].copy()
+          for c in summable_metric_cols:
+            ret[ids_seen[itemId]][c] += row[c]
+        else:
+          ids_seen[itemId] = len(ret)
+          ret.append(row.copy())
+          ret[len(ret)-1]['itemId'] = itemId
+    else:
+      if row['itemId'] in ids_seen:
+        # copy-on-write
+        new_row = ret[ids_seen[row['itemId']]].copy()
+        for c in summable_metric_cols:
+          new_row[c] += row[c]
+        ret[ids_seen[row['itemId']]] = new_row
+      else:
+        ids_seen[row['itemId']] = len(ret)
+        ret.append(row)
+  return ret
 
 def write_dict_list_to_csv_file(
   rows: list[dict],
