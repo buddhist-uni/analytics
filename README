@@ -1,0 +1,6 @@
+# The OBU Analytics Pipeline
+
+OBU primarily uses Google Analytics 4.
+
+This repo pulls data from the GA4 API for use in the production site.
+
