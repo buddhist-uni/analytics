@@ -1,0 +1,33 @@
+name: Archive
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 8 7 * *"
+jobs:
+  Archive:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: git clone main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Google Authentication
+        uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          project_id: ${{ secrets.G_PROJECT_ID }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ secrets.G_IDENTITY_PROVIDER }}
+      - name: Install requirements.txt
+        run: pip install -r requirements.txt
+      - name: Update the Archive
+        run: |
+          GA4_PROPERTY_ID=${{ secrets.GA4_PROPERTY_ID }} python archive.py
+      - name: Commit the Changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'data'
+          message: "Bump the archive (automated commit)"
+          push: true

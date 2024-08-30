@@ -14,7 +14,6 @@ def get_default_property_id():
 
 try:
   from google.analytics import data_v1beta
-  from google.auth.credentials import Credentials
   from google.auth.exceptions import DefaultCredentialsError
   from google.analytics.data_v1beta.types import (
     DateRange,
@@ -22,6 +21,7 @@ try:
     Metric,
     MetricType,
     RunReportRequest,
+    RunReportResponse,
   )
 except ModuleNotFoundError:
   print("pip install google-api-python-client google-analytics-data")
@@ -102,7 +102,7 @@ def report_purchasers_per_itemid(
     raise NotImplementedError("Please add pagination logic to report_purchasers_per_itemid")
   return ret
 
-def report_to_dict_list(report: data_v1beta.RunReportResponse):
+def report_to_dict_list(report: RunReportResponse):
   rows = []
   for row in report.rows:
     row_data = {}
