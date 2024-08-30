@@ -2,7 +2,7 @@ name: Archive
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 8 7 * *"
+    - cron: "30 8 7 */2 *"
 jobs:
   Archive:
     runs-on: ubuntu-latest
