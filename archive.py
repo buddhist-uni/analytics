@@ -15,6 +15,9 @@ from build import (
 metadata = get_metadata()
 first_api_date = get_first_api_date(metadata)
 archive_until = datetime.today() - timedelta(days=7)
+if first_api_date > archive_until:
+  print("No new data to archive")
+  quit(0)
 print(f"Fetching GA4 data from {first_api_date.strftime(DATE_FORMAT)} to {archive_until.strftime(DATE_FORMAT)}...")
 report = ga4.report_purchasers_per_itemid(
   first_api_date.strftime(DATE_FORMAT),
