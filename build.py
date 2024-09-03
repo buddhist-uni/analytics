@@ -61,9 +61,9 @@ if __name__ == "__main__":
 
   print("Merging with archival data...")
   downloaders = merge_new_report_with_old_data(report)
-
   def is_link(itemId):
     return ":" in itemId or itemId.startswith("tags/")
+  # Split into link and content clicks
   link_counts = {
     r['itemId']: r['totalPurchasers']
     for r in downloaders
@@ -74,24 +74,22 @@ if __name__ == "__main__":
     for r in downloaders
     if not is_link(r['itemId'])
   }
+  # Merge in ancient UA Data
+  with open("data/ua_data.csv", "r") as file:
+    csvreader = csv.DictReader(file)
+    for row in csvreader:
+      downloads = int(row['SCALED EVENTS'])
+      if row["Page"] in downloaders:
+        downloaders[row["Page"]] += downloads
+      else:
+        downloaders[row["Page"]] = downloads
 
   print("Writing data to files...")
   for folder in CONTENT_FOLDERS:
     (content_folder / folder).mkdir(parents=True, exist_ok=True)
-  with open("data/ua_data.csv", "r") as file:
-    csvreader = csv.DictReader(file)
-    for row in csvreader:
-      filename = content_folder / (row["Page"]+".download_count")
-      downloads = int(row['SCALED EVENTS'])
-      if row["Page"] in downloaders:
-        downloads += downloaders[row["Page"]]
-        del downloaders[row["Page"]]
-      filename.write_text(str(downloads))
-
-  if len(downloaders) == 0:
-    raise ValueError("No new items found beyond UA data")
   for page, downloads in downloaders.items():
     filename = content_folder / (page+".download_count")
     filename.write_text(str(downloads))
 
+  (content_folder / "download_counts.json").write_text(json.dumps(downloaders))
   (arguments.dest / "link_counts.json").write_text(json.dumps(link_counts))

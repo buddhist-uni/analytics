@@ -27,5 +27,6 @@ The build is (by default) sent to ./build/ with the structure:
 
 link_counts.json - A mapping from URLs to how many ppl have clicked them
 content/         - Data about the /content/ items on the site
+  download_counts.json - A mapping from content subpaths to how many ppl have downloaded it
   {category}/    - Organized the same way as on the site
     {slug}.download_count - A simple text file with just the count
