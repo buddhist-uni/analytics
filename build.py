@@ -83,6 +83,13 @@ if __name__ == "__main__":
         downloaders[row["Page"]] += downloads
       else:
         downloaders[row["Page"]] = downloads
+  # Merge in Search Console data
+  with open("data/sc_data.csv", "r") as file:
+    csvreader = csv.DictReader(file)
+    for row in csvreader:
+      downloads = int(row['clicks'])
+      if 'patanjali-yoga-sutra' in row['URL']:
+        downloaders['canon/yogasutra_patanjali'] += downloads
 
   print("Writing data to files...")
   for folder in CONTENT_FOLDERS:
