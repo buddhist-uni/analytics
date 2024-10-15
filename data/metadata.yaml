@@ -4,3 +4,10 @@ ga4_data:
 ua_data:
   end_date: '2023-01-31'
   start_date: '2020-08-01'
+sc_data:
+  start_date: '2023-06-14'
+  end_date: '2024-10-01'
+content_buckets:
+  - 'exclusive_01'
+  - 'patanjali-yoga-sutra'
+  - 'function-data'
