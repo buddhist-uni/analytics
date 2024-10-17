@@ -6,9 +6,10 @@ import json
 import yaml
 from datetime import datetime, timedelta
 from pathlib import Path
+from functools import cache
 
 import ga4
-
+import searchconsole
 
 DATE_FORMAT = "%Y-%m-%d"
 CONTENT_FOLDERS = [
@@ -23,6 +24,7 @@ CONTENT_FOLDERS = [
   "reference",
 ]
 
+@cache
 def get_metadata():
   with open("data/metadata.yaml", "r") as metafile:
     metadata = yaml.load(metafile, Loader=yaml.FullLoader)
@@ -32,6 +34,12 @@ def get_first_api_date(metadata: dict = None):
   if not metadata:
     metadata = get_metadata()
   last_archive_date = datetime.strptime(metadata["ga4_data"]["end_date"], DATE_FORMAT)
+  return last_archive_date + timedelta(days=1)
+
+def get_sc_api_date(metadata: dict = None):
+  if not metadata:
+    metadata = get_metadata()
+  last_archive_date = datetime.strptime(metadata["sc_data"]["end_date"], DATE_FORMAT)
   return last_archive_date + timedelta(days=1)
 
 def merge_new_report_with_old_data(report: ga4.RunReportResponse) -> list[dict]:
@@ -58,6 +66,32 @@ if __name__ == "__main__":
     first_api_date.strftime(DATE_FORMAT),
     "today",
   )
+
+  sc_from_date = get_sc_api_date()
+  print(f"Fetching data from Search Console since {sc_from_date.strftime(DATE_FORMAT)}...")
+  sc_data = []
+  with open("data/sc_data.csv", "r") as file:
+    csvreader = csv.DictReader(file)
+    for row in csvreader:
+      sc_data.append({
+        'URL': row['URL'],
+        'clicks': int(row['clicks']),
+      })
+  sc_to_date = datetime.now() - timedelta(days=2)
+  if sc_from_date > sc_to_date:
+    print("  No new data to fetch")
+  else:
+    new_sc_data = dict()
+    for bucket in get_metadata()['content_buckets']:
+      new_sc_data.update(searchconsole.get_clicks_per_link(
+        sc_from_date,
+        sc_to_date,
+        pathContains=f"/{bucket}/",
+      ))
+    sc_data.extend({
+      'URL': url,
+      'clicks': int(clicks)
+    } for url, clicks in new_sc_data.items())
 
   print("Merging with archival data...")
   downloaders = merge_new_report_with_old_data(report)
@@ -86,25 +120,23 @@ if __name__ == "__main__":
   # Merge in Search Console data
   print("Merging in Search Console data...")
   url_to_content = json.load(open("data/content_paths.json", "r"))
-  with open("data/sc_data.csv", "r") as file:
-    csvreader = csv.DictReader(file)
-    for row in csvreader:
-      downloads = int(row['clicks'])
-      # The Google Search API doesn't always escape these
-      url = row['URL']\
-        .replace("'", "%27")\
-        .replace("(", "%28")\
-        .replace(")", "%29")
-      if 'patanjali-yoga-sutra' in url:
-        downloaders['canon/yogasutra_patanjali'] += downloads
-      elif url in url_to_content:
-        cp = url_to_content[url]
-        if cp not in downloaders:
-          downloaders[cp] = downloads
-        else:
-          downloaders[cp] += downloads
+  for row in sc_data:
+    downloads = row['clicks']
+    # The Google Search API doesn't always escape these
+    url = row['URL']\
+      .replace("'", "%27")\
+      .replace("(", "%28")\
+      .replace(")", "%29")
+    if 'patanjali-yoga-sutra' in url:
+      downloaders['canon/yogasutra_patanjali'] += downloads
+    elif url in url_to_content:
+      cp = url_to_content[url]
+      if cp not in downloaders:
+        downloaders[cp] = downloads
       else:
-        print(f"  Could not find {row['URL']} in content_paths.json")
+        downloaders[cp] += downloads
+    else:
+      print(f"  Could not find {row['URL']} in content_paths.json")
 
   print("Writing data to files...")
   for folder in CONTENT_FOLDERS:

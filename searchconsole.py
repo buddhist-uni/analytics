@@ -1,5 +1,6 @@
 #!/bin/python
 
+from datetime import datetime
 try:
   from googleapiclient.discovery import build
 except ModuleNotFoundError:
@@ -15,6 +16,10 @@ except Exception as e:
   quit(1)
 
 def get_clicks_per_link(startDate, endDate, pathContains=None, siteUrl=DOMAIN):
+  if isinstance(startDate, datetime):
+    startDate = startDate.strftime("%Y-%m-%d")
+  if isinstance(endDate, datetime):
+    endDate = endDate.strftime("%Y-%m-%d")
   request = {
     "startDate": startDate,
     "endDate": endDate,
@@ -43,8 +48,12 @@ def get_clicks_per_link(startDate, endDate, pathContains=None, siteUrl=DOMAIN):
   except Exception as e:
     print(e)
     quit(1)
-  return {
-    row["keys"][0]: row["clicks"]
-    for row in response["rows"]
-    if row["clicks"] > 0
-  }
+  try:
+    return {
+      row["keys"][0]: row["clicks"]
+      for row in response["rows"]
+      if row["clicks"] > 0
+    }
+  except KeyError:
+    # When there are no "rows" this means no data for this query
+    return {}
