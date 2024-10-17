@@ -2,7 +2,8 @@
 
 OBU primarily uses Google Analytics 4.
 
-This repo pulls data from the GA4 and Google Search Console APIs for use in the production site.
+This repo pulls data from the GA4 and Google Search Console APIs
+for use in the production site "Download Counts".
 
 ## Files
 
@@ -16,12 +17,13 @@ data/            - The raw data pulled from Google
   ua_data.csv    - The old data from Universal Analytics
   ga4_data.csv   - Previous data from GA4
   sc_data.csv    - Previous data from the Search Console
+  content_paths.json - A mapping from file_links to content subpaths
 public/          - Static assets to serve
   index.html     - A basic info page if anyone goes to the root
 .github/         - GitHub Files
   workflows/     - GitHub Action Cron Jobs
     deploy.yaml  - Deploys the GitHub Pages site with the latest data (nightly)
-    archive.yaml - Refreshes the ga4_data.csv archive (bimonthly)
+    archive.yaml - Refreshes the ga4_data, sc_data, and content_paths (bimonthly)
 
 ## Pages
 

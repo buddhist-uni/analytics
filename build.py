@@ -84,12 +84,27 @@ if __name__ == "__main__":
       else:
         downloaders[row["Page"]] = downloads
   # Merge in Search Console data
+  print("Merging in Search Console data...")
+  url_to_content = json.load(open("data/content_paths.json", "r"))
   with open("data/sc_data.csv", "r") as file:
     csvreader = csv.DictReader(file)
     for row in csvreader:
       downloads = int(row['clicks'])
-      if 'patanjali-yoga-sutra' in row['URL']:
+      # The Google Search API doesn't always escape these
+      url = row['URL']\
+        .replace("'", "%27")\
+        .replace("(", "%28")\
+        .replace(")", "%29")
+      if 'patanjali-yoga-sutra' in url:
         downloaders['canon/yogasutra_patanjali'] += downloads
+      elif url in url_to_content:
+        cp = url_to_content[url]
+        if cp not in downloaders:
+          downloaders[cp] = downloads
+        else:
+          downloaders[cp] += downloads
+      else:
+        print(f"  Could not find {row['URL']} in content_paths.json")
 
   print("Writing data to files...")
   for folder in CONTENT_FOLDERS:
