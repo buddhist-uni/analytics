@@ -48,12 +48,11 @@ def get_clicks_per_link(startDate, endDate, pathContains=None, siteUrl=DOMAIN):
   except Exception as e:
     print(e)
     quit(1)
-  try:
-    return {
-      row["keys"][0]: row["clicks"]
-      for row in response["rows"]
-      if row["clicks"] > 0
-    }
-  except KeyError:
-    # When there are no "rows" this means no data for this query
+  if "rows" not in response:
+    # No data for this query
     return {}
+  return {
+    row["keys"][0]: row["clicks"]
+    for row in response["rows"]
+    if row["clicks"] > 0
+  }
