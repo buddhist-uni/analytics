@@ -86,7 +86,7 @@ if __name__ == "__main__":
       new_sc_data.update(searchconsole.get_clicks_per_link(
         sc_from_date,
         sc_to_date,
-        pathContains=f"/{bucket}/",
+        pathContains=bucket,
       ))
     sc_data.extend({
       'URL': url,
