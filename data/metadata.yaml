@@ -1,11 +1,15 @@
 content_buckets:
 - exclusive_01
 - function-data
+- smallepubs
+- smallpdfs
+- mediumfiles
+- largefiles
 ga4_data:
-  end_date: '2024-10-31'
+  end_date: '2024-11-05'
   start_date: '2023-02-01'
 sc_data:
-  end_date: '2024-10-31'
+  end_date: '2024-11-05'
   start_date: '2023-06-14'
 ua_data:
   end_date: '2023-01-31'
