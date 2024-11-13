@@ -136,7 +136,7 @@ if __name__ == "__main__":
       else:
         downloaders[cp] += downloads
     else:
-      print(f"  Could not find {row['URL']} in content_paths.json")
+      print(f"::warning title=Unknown content::Could not find {row['URL']} in content_paths.json. Rerurn archive.py?")
 
   print("Writing data to files...")
   for folder in CONTENT_FOLDERS:
