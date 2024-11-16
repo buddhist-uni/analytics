@@ -1,5 +1,6 @@
 google-api-python-client
 google-analytics-data
 google_auth_oauthlib
+bing-webmaster-tools
 pyyaml
 

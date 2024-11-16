@@ -37,7 +37,7 @@ jobs:
       - name: Update the Archive
         run: |
           cd analytics
-          GA4_PROPERTY_ID=${{ secrets.GA4_PROPERTY_ID }} python archive.py
+          BING_WEBMASTER_API_KEY=${{ secrets.BING_WEBMASTER_API_KEY }} GA4_PROPERTY_ID=${{ secrets.GA4_PROPERTY_ID }} python archive.py
       - name: Commit the Changes
         uses: EndBug/add-and-commit@v9
         with:

@@ -1,5 +1,6 @@
 #!/bin/python
 
+import asyncio
 import csv
 import yaml
 from datetime import datetime, timedelta
@@ -12,6 +13,7 @@ from build import (
   get_sc_api_date,
   DATE_FORMAT,
   merge_new_report_with_old_data,
+  fetch_bing_data,
 )
 
 metadata = get_metadata()
@@ -61,6 +63,37 @@ with open("data/sc_data.csv", "w") as file:
   for url, clicks in sc_data.items():
     csvwriter.writerow({'URL': url, 'clicks': clicks})
 metadata['sc_data']['end_date'] = archive_until.strftime(DATE_FORMAT)
+
+print(f"Fetching Bing data...")
+page_stats = asyncio.run(fetch_bing_data())
+
+print("Merging new Bing data into the archive...")
+end_date = datetime.strptime(metadata['bing_data']['end_date'], DATE_FORMAT)
+pdf_clicks = [p for p in page_stats if p.clicks > 0 and p.query.endswith(".pdf") and p.date > end_date + timedelta(days=1)]
+if not pdf_clicks:
+  print("  No new data to merge")
+else:
+  new_end_date = max(p.date for p in pdf_clicks)
+  metadata['bing_data']['end_date'] = new_end_date.strftime(DATE_FORMAT)
+  newurls = {p.query for p in pdf_clicks}
+  newbingclicks = {url: sum(p.clicks for p in pdf_clicks if p.query == url) for url in newurls}
+  oldurls = set()
+  oldbingclicks = dict()
+  with open("data/bing_data.csv", "r") as file:
+    csvreader = csv.DictReader(file)
+    for row in csvreader:
+      oldurls.add(row['URL'])
+      oldbingclicks[row['URL']] = int(row['clicks'])
+  for url, clicks in newbingclicks.items():
+    if url in oldurls:
+      oldbingclicks[url] += clicks
+    else:
+      oldbingclicks[url] = clicks
+  with open("data/bing_data.csv", "w") as file:
+    csvwriter = csv.DictWriter(file, fieldnames=['URL', 'clicks'])
+    csvwriter.writeheader()
+    for url, clicks in oldbingclicks.items():
+      csvwriter.writerow({'URL': url, 'clicks': clicks})
 
 yaml.dump(
   metadata,

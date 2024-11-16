@@ -7,6 +7,7 @@ import yaml
 from datetime import datetime, timedelta
 from pathlib import Path
 from functools import cache
+from bing_webmaster_tools import Settings, BingWebmasterClient
 
 import ga4
 import searchconsole
@@ -41,6 +42,11 @@ def get_sc_api_date(metadata: dict = None):
     metadata = get_metadata()
   last_archive_date = datetime.strptime(metadata["sc_data"]["end_date"], DATE_FORMAT)
   return last_archive_date + timedelta(days=1)
+
+async def fetch_bing_data():
+  async with BingWebmasterClient(Settings.from_env()) as client:
+    page_stats = await client.traffic.get_page_stats("https://buddhistuniversity.net")
+  return page_stats
 
 def merge_new_report_with_old_data(report: ga4.RunReportResponse) -> list[dict]:
   downloaders = ga4.report_to_dict_list(report)
