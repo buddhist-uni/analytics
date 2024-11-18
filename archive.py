@@ -1,6 +1,5 @@
 #!/bin/python
 
-import asyncio
 import csv
 import yaml
 from datetime import datetime, timedelta
@@ -13,7 +12,7 @@ from build import (
   get_sc_api_date,
   DATE_FORMAT,
   merge_new_report_with_old_data,
-  fetch_bing_data,
+  fetch_new_bing_data,
 )
 
 metadata = get_metadata()
@@ -64,12 +63,8 @@ with open("data/sc_data.csv", "w") as file:
     csvwriter.writerow({'URL': url, 'clicks': clicks})
 metadata['sc_data']['end_date'] = archive_until.strftime(DATE_FORMAT)
 
-print(f"Fetching Bing data...")
-page_stats = asyncio.run(fetch_bing_data())
-
 print("Merging new Bing data into the archive...")
-end_date = datetime.strptime(metadata['bing_data']['end_date'], DATE_FORMAT)
-pdf_clicks = [p for p in page_stats if p.clicks > 0 and p.query.endswith(".pdf") and p.date > end_date + timedelta(days=1)]
+pdf_clicks = fetch_new_bing_data(metadata)
 if not pdf_clicks:
   print("  No new data to merge")
 else:
