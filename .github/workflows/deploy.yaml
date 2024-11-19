@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir -p ${{ env.BUILD_DIR }}
           cp -r public/* ${{ env.BUILD_DIR }}/
-          GA4_PROPERTY_ID=${{ secrets.GA4_PROPERTY_ID }} python build.py --dest=${{ env.BUILD_DIR }}
+          BING_WEBMASTER_API_KEY=${{ secrets.BING_WEBMASTER_API_KEY }} GA4_PROPERTY_ID=${{ secrets.GA4_PROPERTY_ID }} python build.py --dest=${{ env.BUILD_DIR }}
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
         with:
