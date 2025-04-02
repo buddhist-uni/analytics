@@ -123,9 +123,9 @@ def report_to_dict_list(report: RunReportResponse):
 
 def aggregate_duplicate_itemids(
     rows: list[dict],
-  ) -> list[dict]:
-  """ Merges rows with the same itemId into a single row.
-
+) -> list[dict]:
+  r"""Merges rows with the same itemId into a single row.
+  
   Does not modify the original rows.
   
   ASSUMES that itemId is the only dimension AND that all other
