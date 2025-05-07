@@ -1,5 +1,5 @@
 bing_data:
-  end_date: '2025-02-28'
+  end_date: '2025-05-02'
   start_date: '2023-08-04'
 content_buckets:
 - exclusive_01
@@ -10,10 +10,10 @@ content_buckets:
 - largefiles
 - cfr-cdn
 ga4_data:
-  end_date: '2025-02-28'
+  end_date: '2025-04-30'
   start_date: '2023-02-01'
 sc_data:
-  end_date: '2025-02-28'
+  end_date: '2025-04-30'
   start_date: '2023-06-14'
 ua_data:
   end_date: '2023-01-31'
