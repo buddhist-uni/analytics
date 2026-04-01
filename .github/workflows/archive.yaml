@@ -11,18 +11,18 @@ jobs:
       id-token: write
     steps:
       - name: git clone main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           path: 'analytics'
       - name: git clone website
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: 'buddhist-uni/buddhist-uni.github.io'
           path: 'website'
           fetch-depth: 0
       - name: Google Authentication
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         id: auth
         with:
           project_id: ${{ secrets.G_PROJECT_ID }}
@@ -39,7 +39,7 @@ jobs:
           cd analytics
           BING_WEBMASTER_API_KEY=${{ secrets.BING_WEBMASTER_API_KEY }} GA4_PROPERTY_ID=${{ secrets.GA4_PROPERTY_ID }} python archive.py
       - name: Commit the Changes
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           cwd: './analytics'
           add: 'data'

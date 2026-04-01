@@ -18,7 +18,7 @@ jobs:
       - name: git clone main
         uses: actions/checkout@v4
       - name: Google Authentication
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         id: auth
         with:
           project_id: ${{ secrets.G_PROJECT_ID }}
@@ -32,10 +32,10 @@ jobs:
           cp -r public/* ${{ env.BUILD_DIR }}/
           BING_WEBMASTER_API_KEY=${{ secrets.BING_WEBMASTER_API_KEY }} GA4_PROPERTY_ID=${{ secrets.GA4_PROPERTY_ID }} python build.py --dest=${{ env.BUILD_DIR }}
       - name: Upload Build Artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ${{ env.BUILD_DIR }}
       - name: Deploy the Artifact to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
